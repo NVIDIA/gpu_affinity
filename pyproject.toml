@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+skip-string-normalization = true
+line-length = 79
+
+[tool.isort]
+force_single_line = true
+extra_standard_library = ["pkg_resources"]
+
+[tool.setuptools_scm]
+fallback_version = "0.0.0"
+
+[tool.pylint]
+disable = [
+   "missing-function-docstring", 
+   "missing-class-docstring",
+   "missing-module-docstring",
+   "broad-except",
+   "invalid-name",
+   "logging-fstring-interpolation",
+   ]
