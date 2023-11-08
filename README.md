@@ -24,8 +24,7 @@ GPU), which is typical for multi-GPU training workloads using
 ## Installation
 
 ### Using pip
-Install the package with `pip` directly from `github` (requires access
-to NVIDIA internal network).
+Install the package with `pip` directly from `github`.
 
 ```
 pip install git+https://github.com/NVIDIA/gpu_affinity
