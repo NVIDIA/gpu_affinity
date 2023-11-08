@@ -37,7 +37,7 @@ def parse_args():
     )
 
     parser.add_argument(
-        '--local_rank',
+        '--local-rank',
         type=int,
         default=os.getenv('LOCAL_RANK', 0),
         help='Used for multi-process training.',
