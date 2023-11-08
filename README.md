@@ -173,6 +173,6 @@ def set_affinity(
         main()
 
     Launch the example with:
-    python -m torch.distributed.launch --nproc_per_node <#GPUs> example.py
+    python -m torch.distributed.run --nproc_per_node <#GPUs> example.py
     '''
 ```
