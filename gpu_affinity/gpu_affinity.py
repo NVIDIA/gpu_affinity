@@ -62,10 +62,47 @@ class Device:
 
     def __init__(self, device_idx):
         if 'CUDA_VISIBLE_DEVICES' in os.environ:
-            remapped_device_ids = [
-                int(id) for id in os.environ['CUDA_VISIBLE_DEVICES'].split(',')
-            ]
-            device_idx = remapped_device_ids[device_idx]
+            visible_devices = os.environ['CUDA_VISIBLE_DEVICES'].split(',')
+            if device_idx >= len(visible_devices):
+                msg = (
+                    f'Requested device_idx={device_idx} is out of bounds for '
+                    f'the specified CUDA_VISIBLE_DEVICES={visible_devices}'
+                )
+                raise GPUAffinityError(msg)
+            try:
+                # interpret elements of CUDA_VISIBLE_DEVICES as integer indices
+                remapped_device_ids = [int(id) for id in visible_devices]
+                device_idx = remapped_device_ids[device_idx]
+            except ValueError:
+                # interpret elements of CUDA_VISIBLE_DEVICES as UUID strings
+                num_devices = pynvml.nvmlDeviceGetCount()
+                devices_uuids = [
+                    pynvml.nvmlDeviceGetUUID(handle)
+                    for handle in [
+                        pynvml.nvmlDeviceGetHandleByIndex(idx)
+                        for idx in range(num_devices)
+                    ]
+                ]
+                indices_with_matching_prefixes = [
+                    i
+                    for i in range(num_devices)
+                    if devices_uuids[i].startswith(visible_devices[device_idx])
+                ]
+                if len(indices_with_matching_prefixes) == 0:
+                    msg = (
+                        f'None of the devices matched the specified UUID '
+                        f'prefix, prefix={visible_devices[device_idx]}, '
+                        f'devices={devices_uuids}'
+                    )
+                    raise GPUAffinityError(msg)
+                elif len(indices_with_matching_prefixes) > 1:
+                    msg = (
+                        f'Multiple devices matched the specified UUID '
+                        f'prefix, prefix={visible_devices[device_idx]}, '
+                        f'devices={devices_uuids}'
+                    )
+                    raise GPUAffinityError(msg)
+                device_idx = indices_with_matching_prefixes[0]
 
         try:
             self.handle = pynvml.nvmlDeviceGetHandleByIndex(device_idx)
